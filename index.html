@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark:bg-gray-800 dark:text-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn Japanese kana with an interactive chart, quiz, and progress tracking for hiragana, katakana, and combination sounds.">
+  <meta name="keywords" content="Japanese, kana, hiragana, katakana, learning, quiz">
+  <title>Japanese Kana Comprehensive Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; }
+    th:hover { background-color: #181010; transition: background-color 0.2s; }
+    @media print { nav, button, #quiz, #search, #progress { display: none; } table { font-size: 12px; } }
+    .dark .bg-white { background-color: #e7f1fa; }
+    .dark .bg-indigo-500 { background-color: #000000; }
+    .dark .text-indigo-800 { color: #062bff; }
+    .dark .border-gray-300 { border-color: #2267f1; }
+    .dark .divide-gray-500 { border-color: #1a6ce7; }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-white-50 to-blue-200 text-black-900 dark:bg-gray-800 dark:text-gray-100">
+  <nav class="bg-indigo-700 text-white p-5 sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto flex justify-between items-center">
+      <ul class="flex space-x-10">
+        <li><a href="#basic-kana" class="hover:underline">Basic Kana</a></li>
+        <li><a href="#voiced-kana" class="hover:underline">Voiced Kana</a></li>
+        <li><a href="#yoon" class="hover:underline">Yōon</a></li>
+        <li><a href="#small-kana" class="hover:underline">Small Kana</a></li>
+        <li><a href="#quiz" class="hover:underline">Quiz</a></li>
+        <li><a href="#progress" class="hover:underline">Progress</a></li>
+      </ul>
+      <!-- <button onclick="toggleDarkMode()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Toggle Dark Mode</button> -->
+    </div>
+  </nav>
+
+  <section class="max-w-6xl mx-auto my-8 px-4">
+    <h1 class="text-4xl font-bold text-center py-8 text-indigo-700 dark:text-indigo-300">Japanese Kana Comprehensive Chart</h1>
+    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+      <summary class="text-lg font-semibold text-indigo-800 dark:text-indigo-800">What are Hiragana and Katakana?</summary>
+      <p class="mt-2 text-indigo-900">Hiragana is used for native Japanese words and grammatical elements, while Katakana is used for foreign words, onomatopoeia, and emphasis.</p>
+    </details>
+    <input type="text" id="search" class="border p-2 w-full mb-4 dark:bg-gray-700 dark:text-white" placeholder="Search kana or romaji">
+  </section>
+
+  <section id="basic-kana" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Basic Kana (Hiragana + Katakana)</h2>
+    <div class="overflow-x-auto shadow-md rounded-lg sm:overflow-visible">
+      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
+        <thead class="bg-indigo-500 text-white">
+          <tr>
+            <th class="border border-gray-300 px-4 py-3">Learned</th>
+            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Katakana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Example Word</th>
+          </tr>
+        </thead>
+        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
+          <tr><td><input type="checkbox" onchange="saveProgress('あ', this.checked)"></td><td class="px-4 py-2" onclick="speak('あ')">あ</td><td>a</td><td>ア</td><td>a</td><td>ありがとう (arigatou - thank you)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('い', this.checked)"></td><td class="px-4 py-2" onclick="speak('い')">い</td><td>i</td><td>イ</td><td>i</td><td>いぬ (inu - dog)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('う', this.checked)"></td><td class="px-4 py-2" onclick="speak('う')">う</td><td>u</td><td>ウ</td><td>u</td><td>うみ (umi - sea)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('え', this.checked)"></td><td class="px-4 py-2" onclick="speak('え')">え</td><td>e</td><td>エ</td><td>e</td><td>えき (eki - station)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('お', this.checked)"></td><td class="px-4 py-2" onclick="speak('お')">お</td><td>o</td><td>オ</td><td>o</td><td>おちゃ (ocha - tea)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('か', this.checked)"></td><td class="px-4 py-2" onclick="speak('か')">か</td><td>ka</td><td>カ</td><td>ka</td><td>かさ (kasa - umbrella)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('き', this.checked)"></td><td class="px-4 py-2" onclick="speak('き')">き</td><td>ki</td><td>キ</td><td>ki</td><td>きりん (kirin - giraffe)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('く', this.checked)"></td><td class="px-4 py-2" onclick="speak('く')">く</td><td>ku</td><td>ク</td><td>ku</td><td>くるま (kuruma - car)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('け', this.checked)"></td><td class="px-4 py-2" onclick="speak('け')">け</td><td>ke</td><td>ケ</td><td>ke</td><td>けしゴム (keshigomu - eraser)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('こ', this.checked)"></td><td class="px-4 py-2" onclick="speak('こ')">こ</td><td>ko</td><td>コ</td><td>ko</td><td>こども (kodomo - child)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('さ', this.checked)"></td><td class="px-4 py-2" onclick="speak('さ')">さ</td><td>sa</td><td>サ</td><td>sa</td><td>さかな (sakana - fish)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('し', this.checked)"></td><td class="px-4 py-2" onclick="speak('し')">し</td><td>shi</td><td>シ</td><td>shi</td><td>しろ (shiro - white)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('す', this.checked)"></td><td class="px-4 py-2" onclick="speak('す')">す</td><td>su</td><td>ス</td><td>su</td><td>すいか (suika - watermelon)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('せ', this.checked)"></td><td class="px-4 py-2" onclick="speak('せ')">せ</td><td>se</td><td>セ</td><td>se</td><td>せんせい (sensei - teacher)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('そ', this.checked)"></td><td class="px-4 py-2" onclick="speak('そ')">そ</td><td>so</td><td>ソ</td><td>so</td><td>そら (sora - sky)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('た', this.checked)"></td><td class="px-4 py-2" onclick="speak('た')">た</td><td>ta</td><td>タ</td><td>ta</td><td>たこ (tako - octopus)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ち', this.checked)"></td><td class="px-4 py-2" onclick="speak('ち')">ち</td><td>chi</td><td>チ</td><td>chi</td><td>ちず (chizu - map)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('つ', this.checked)"></td><td class="px-4 py-2" onclick="speak('つ')">つ</td><td>tsu</td><td>ツ</td><td>tsu</td><td>つき (tsuki - moon)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('て', this.checked)"></td><td class="px-4 py-2" onclick="speak('て')">て</td><td>te</td><td>テ</td><td>te</td><td>てがみ (tegami - letter)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('と', this.checked)"></td><td class="px-4 py-2" onclick="speak('と')">と</td><td>to</td><td>ト</td><td>to</td><td>とけい (tokei - clock)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('な', this.checked)"></td><td class="px-4 py-2" onclick="speak('な')">な</td><td>na</td><td>ナ</td><td>na</td><td>なまえ (namae - name)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('に', this.checked)"></td><td class="px-4 py-2" onclick="speak('に')">に</td><td>ni</td><td>ニ</td><td>ni</td><td>にほん (nihon - Japan)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぬ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぬ')">ぬ</td><td>nu</td><td>ヌ</td><td>nu</td><td>ぬの (nuno - cloth)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ね', this.checked)"></td><td class="px-4 py-2" onclick="speak('ね')">ね</td><td>ne</td><td>ネ</td><td>ne</td><td>ねこ (neko - cat)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('の', this.checked)"></td><td class="px-4 py-2" onclick="speak('の')">の</td><td>no</td><td>ノ</td><td>no</td><td>のり (nori - seaweed)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('は', this.checked)"></td><td class="px-4 py-2" onclick="speak('は')">は</td><td>ha</td><td>ハ</td><td>ha</td><td>はな (hana - flower)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ひ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひ')">ひ</td><td>hi</td><td>ヒ</td><td>hi</td><td>ひこうき (hikouki - airplane)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ふ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ふ')">ふ</td><td>fu</td><td>フ</td><td>fu</td><td>ふね (fune - boat)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('へ', this.checked)"></td><td class="px-4 py-2" onclick="speak('へ')">へ</td><td>he</td><td>ヘ</td><td>he</td><td>へや (heya - room)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ほ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ほ')">ほ</td><td>ho</td><td>ホ</td><td>ho</td><td>ほん (hon - book)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ま', this.checked)"></td><td class="px-4 py-2" onclick="speak('ま')">ま</td><td>ma</td><td>マ</td><td>ma</td><td>まど (mado - window)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('み', this.checked)"></td><td class="px-4 py-2" onclick="speak('み')">み</td><td>mi</td><td>ミ</td><td>mi</td><td>みず (mizu - water)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('む', this.checked)"></td><td class="px-4 py-2" onclick="speak('む')">む</td><td>mu</td><td>ム</td><td>mu</td><td>むし (mushi - insect)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('め', this.checked)"></td><td class="px-4 py-2" onclick="speak('め')">め</td><td>me</td><td>メ</td><td>me</td><td>めがね (megane - glasses)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('も', this.checked)"></td><td class="px-4 py-2" onclick="speak('も')">も</td><td>mo</td><td>モ</td><td>mo</td><td>もも (momo - peach)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('や', this.checked)"></td><td class="px-4 py-2" onclick="speak('や')">や</td><td>ya</td><td>ヤ</td><td>ya</td><td>やま (yama - mountain)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ゆ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゆ')">ゆ</td><td>yu</td><td>ユ</td><td>yu</td><td>ゆき (yuki - snow)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('よ', this.checked)"></td><td class="px-4 py-2" onclick="speak('よ')">よ</td><td>yo</td><td>ヨ</td><td>yo</td><td>よる (yoru - night)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ら', this.checked)"></td><td class="px-4 py-2" onclick="speak('ら')">ら</td><td>ra</td><td>ラ</td><td>ra</td><td>ラジオ (rajio - radio)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('り', this.checked)"></td><td class="px-4 py-2" onclick="speak('り')">り</td><td>ri</td><td>リ</td><td>ri</td><td>りんご (ringo - apple)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('る', this.checked)"></td><td class="px-4 py-2" onclick="speak('る')">る</td><td>ru</td><td>ル</td><td>ru</td><td>るす (rusu - absence)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('れ', this.checked)"></td><td class="px-4 py-2" onclick="speak('れ')">れ</td><td>re</td><td>レ</td><td>re</td><td>れいぞうこ (reizouko - refrigerator)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ろ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ろ')">ろ</td><td>ro</td><td>ロ</td><td>ro</td><td>ろぼっと (robotto - robot)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('わ', this.checked)"></td><td class="px-4 py-2" onclick="speak('わ')">わ</td><td>wa</td><td>ワ</td><td>wa</td><td>わに (wani - crocodile)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('を', this.checked)"></td><td class="px-4 py-2" onclick="speak('を')">を</td><td>wo</td><td>ヲ</td><td>wo</td><td>を (particle)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ん', this.checked)"></td><td class="px-4 py-2" onclick="speak('ん')">ん</td><td>n</td><td>ン</td><td>n</td><td>こんにちは (konnichiwa - hello)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="voiced-kana" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Voiced Kana (Dakuon & Handakuon)</h2>
+    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Dakuon and Handakuon?</summary>
+      <p class="mt-2 text-indigo-900">Dakuon are voiced kana with two dots (e.g., が from か), and Handakuon are semi-voiced with a circle (e.g., ぱ from は).</p>
+    </details>
+    <div class="overflow-x-auto shadow-md rounded-lg">
+      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
+        <thead class="bg-indigo-500 text-white">
+          <tr>
+            <th class="border border-gray-300 px-4 py-3">Learned</th>
+            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Katakana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Example Word</th>
+          </tr>
+        </thead>
+        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
+          <tr><td><input type="checkbox" onchange="saveProgress('が', this.checked)"></td><td class="px-4 py-2" onclick="speak('が')">が</td><td>ga</td><td>ガ</td><td>ga</td><td>がっこう (gakkou - school)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぎ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎ')">ぎ</td><td>gi</td><td>ギ</td><td>gi</td><td>ぎん (gin - silver)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぐ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぐ')">ぐ</td><td>gu</td><td>グ</td><td>gu</td><td>ぐるぐる (guruguru - spinning)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('げ', this.checked)"></td><td class="px-4 py-2" onclick="speak('げ')">げ</td><td>ge</td><td>ゲ</td><td>ge</td><td>げんき (genki - healthy)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ご', this.checked)"></td><td class="px-4 py-2" onclick="speak('ご')">ご</td><td>go</td><td>ゴ</td><td>go</td><td>ごはん (gohan - rice)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ざ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ざ')">ざ</td><td>za</td><td>ザ</td><td>za</td><td>ざっし (zasshi - magazine)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('じ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じ')">じ</td><td>ji</td><td>ジ</td><td>ji</td><td>じしょ (jisho - dictionary)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ず', this.checked)"></td><td class="px-4 py-2" onclick="speak('ず')">ず</td><td>zu</td><td>ズ</td><td>zu</td><td>ずぼん (zubon - trousers)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぜ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぜ')">ぜ</td><td>ze</td><td>ゼ</td><td>ze</td><td>ぜんぶ (zenbu - all)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぞ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぞ')">ぞ</td><td>zo</td><td>ゾ</td><td>zo</td><td>ぞう (zou - elephant)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('だ', this.checked)"></td><td class="px-4 py-2" onclick="speak('だ')">だ</td><td>da</td><td>ダ</td><td>da</td><td>だいず (daizu - soybean)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぢ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぢ')">ぢ</td><td>ji</td><td>ヂ</td><td>ji</td><td>はぢ (haji - shame)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('づ', this.checked)"></td><td class="px-4 py-2" onclick="speak('づ')">づ</td><td>zu</td><td>ヅ</td><td>zu</td><td>つづく (tsuzuku - continue)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('で', this.checked)"></td><td class="px-4 py-2" onclick="speak('で')">で</td><td>de</td><td>デ</td><td>de</td><td>でんしゃ (densha - train)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ど', this.checked)"></td><td class="px-4 py-2" onclick="speak('ど')">ど</td><td>do</td><td>ド</td><td>do</td><td>どあ (doa - door)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ば', this.checked)"></td><td class="px-4 py-2" onclick="speak('ば')">ば</td><td>ba</td><td>バ</td><td>ba</td><td>ばら (bara - rose)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('び', this.checked)"></td><td class="px-4 py-2" onclick="speak('び')">び</td><td>bi</td><td>ビ</td><td>bi</td><td>びようしつ (biyoushitsu - salon)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぶ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぶ')">ぶ</td><td>bu</td><td>ブ</td><td>bu</td><td>ぶた (buta - pig)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('べ', this.checked)"></td><td class="px-4 py-2" onclick="speak('べ')">べ</td><td>be</td><td>ベ</td><td>be</td><td>べんとう (bentou - lunchbox)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぼ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぼ')">ぼ</td><td>bo</td><td>ボ</td><td>bo</td><td>ぼうし (boushi - hat)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぱ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぱ')">ぱ</td><td>pa</td><td>パ</td><td>pa</td><td>ぱん (pan - bread)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぴ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴ')">ぴ</td><td>pi</td><td>ピ</td><td>pi</td><td>ぴあの (piano - piano)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぷ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぷ')">ぷ</td><td>pu</td><td>プ</td><td>pu</td><td>ぷーる (puuru - pool)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぺ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぺ')">ぺ</td><td>pe</td><td>ペ</td><td>pe</td><td>ぺん (pen - pen)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぽ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぽ')">ぽ</td><td>po</td><td>ポ</td><td>po</td><td>ぽけっと (poketto - pocket)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="yoon" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Combo Sounds (Yōon)</h2>
+    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Yōon?</summary>
+      <p class="mt-2 text-indigo-900">Yōon are combination sounds where a consonant kana is followed by a small ゃ, ゅ, or ょ, creating a single syllable (e.g., きゃ = kya).</p>
+    </details>
+    <div class="overflow-x-auto shadow-md rounded-lg">
+      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
+        <thead class="bg-indigo-500 text-white">
+          <tr>
+            <th class="border border-gray-300 px-4 py-3">Learned</th>
+            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Katakana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Example Word</th>
+          </tr>
+        </thead>
+        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
+          <tr><td><input type="checkbox" onchange="saveProgress('きゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きゃ')">きゃ</td><td>kya</td><td>キャ</td><td>kya</td><td>きゃべつ (kyabetsu - cabbage)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('きゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きゅ')">きゅ</td><td>kyu</td><td>キュ</td><td>kyu</td><td>きゅうり (kyuuri - cucumber)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('きょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きょ')">きょ</td><td>kyo</td><td>キョ</td><td>kyo</td><td>きょう (kyou - today)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('しゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しゃ')">しゃ</td><td>sha</td><td>シャ</td><td>sha</td><td>しゃしん (shashin - photo)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('しゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しゅ')">しゅ</td><td>shu</td><td>シュ</td><td>shu</td><td>しゅうまつ (shuumatsu - weekend)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('しょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しょ')">しょ</td><td>sho</td><td>ショ</td><td>sho</td><td>しょてん (shoten - bookstore)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ちゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちゃ')">ちゃ</td><td>cha</td><td>チャ</td><td>cha</td><td>ちゃわん (chawan - teacup)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ちゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちゅ')">ちゅ</td><td>chu</td><td>チュ</td><td>chu</td><td>ちゅうがっこう (chuugakkou - middle school)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ちょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちょ')">ちょ</td><td>cho</td><td>チョ</td><td>cho</td><td>ちょこ (choko - chocolate)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('にゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にゃ')">にゃ</td><td>nya</td><td>ニャ</td><td>nya</td><td>にゃんこ (nyanko - kitty)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('にゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にゅ')">にゅ</td><td>nyu</td><td>ニュ</td><td>nyu</td><td>にゅうし (nyuushi - entrance exam)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('にょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にょ')">にょ</td><td>nyo</td><td>ニョ</td><td>nyo</td><td>にょう (nyou - urine)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ひゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひゃ')">ひゃ</td><td>hya</td><td>ヒャ</td><td>hya</td><td>ひゃく (hyaku - hundred)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ひゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひゅ')">ひゅ</td><td>hyu</td><td>ヒュ</td><td>hyu</td><td>ひゅう (hyuu - whistling sound)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ひょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひょ')">ひょ</td><td>hyo</td><td>ヒョ</td><td>hyo</td><td>ひょう (hyou - chart)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('みゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みゃ')">みゃ</td><td>mya</td><td>ミャ</td><td>mya</td><td>みゃく (myaku - pulse)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('みゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みゅ')">みゅ</td><td>myu</td><td>ミュ</td><td>myu</td><td>ミュージック (myuujikku - music)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('みょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みょ')">みょ</td><td>myo</td><td>ミョ</td><td>myo</td><td>みょうじ (myouji - surname)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('りゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りゃ')">りゃ</td><td>rya</td><td>リャ</td><td>rya</td><td>りゃくご (ryakugo - abbreviation)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('りゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りゅ')">りゅ</td><td>ryu</td><td>リュ</td><td>ryu</td><td>りゅう (ryuu - dragon)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('りょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りょ')">りょ</td><td>ryo</td><td>リョ</td><td>ryo</td><td>りょこう (ryokou - travel)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぎゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎゃ')">ぎゃ</td><td>gya</td><td>ギャ</td><td>gya</td><td>ぎゃく (gyaku - reverse)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぎゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎゅ')">ぎゅ</td><td>gyu</td><td>ギュ</td><td>gyu</td><td>ぎゅう (gyuu - cow)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぎょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎょ')">ぎょ</td><td>gyo</td><td>ギョ</td><td>gyo</td><td>ぎょかい (gyokai - fishing industry)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('じゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じゃ')">じゃ</td><td>ja</td><td>ジャ</td><td>ja</td><td>じゃがいも (jagaimo - potato)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('じゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じゅ')">じゅ</td><td>ju</td><td>ジュ</td><td>ju</td><td>じゅう (juu - ten)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('じょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じょ')">じょ</td><td>jo</td><td>ジョ</td><td>jo</td><td>じょう (jou - castle)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('びゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びゃ')">びゃ</td><td>bya</td><td>ビャ</td><td>bya</td><td>びゃくや (byakuya - white night)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('びゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びゅ')">びゅ</td><td>byu</td><td>ビュ</td><td>byu</td><td>ビュー (byuu - view)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('びょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びょ')">びょ</td><td>byo</td><td>ビョ</td><td>byo</td><td>びょういん (byouin - hospital)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぴゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴゃ')">ぴゃ</td><td>pya</td><td>ピャ</td><td>pya</td><td>ぴゃっと (pyatto - quickly)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぴゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴゅ')">ぴゅ</td><td>pyu</td><td>ピュ</td><td>pyu</td><td>ピュア (pyua - pure)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ぴょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴょ')">ぴょ</td><td>pyo</td><td>ピョ</td><td>pyo</td><td>ぴょん (pyon - hop)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="small-kana" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Small Kana & Obsolete Kana</h2>
+    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Small Kana?</summary>
+      <p class="mt-2 text-indigo-900">Small kana like っ modify pronunciation (gemination), while ゐ and ゑ are obsolete kana used historically.</p>
+    </details>
+    <div class="overflow-x-auto shadow-md rounded-lg">
+      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
+        <thead class="bg-indigo-500 text-white">
+          <tr>
+            <th class="border border-gray-300 px-4 py-3">Learned</th>
+            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Katakana</th>
+            <th class="border border-gray-300 px-4 py-3">Romaji</th>
+            <th class="border border-gray-300 px-4 py-3">Example Word</th>
+          </tr>
+        </thead>
+        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-800">
+          <tr><td><input type="checkbox" onchange="saveProgress('っ', this.checked)"></td><td class="px-4 py-2" onclick="speak('っ')">っ</td><td>(gemination)</td><td>ッ</td><td>(gemination)</td><td>きって (kitte - stamp)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ゐ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゐ')">ゐ</td><td>wi</td><td>ヰ</td><td>wi</td><td>(historical use)</td></tr>
+          <tr><td><input type="checkbox" onchange="saveProgress('ゑ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゑ')">ゑ</td><td>we</td><td>ヱ</td><td>we</td><td>(historical use)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="quiz" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-700">Kana Quiz</h2>
+    <div class="bg-black dark:bg-gray-700 p-6 rounded-lg shadow-md">
+      <p class="text-3xl text-center mb-4" id="kana-display">あ</p>
+      <input type="text" id="user-input" class="border p-2 w-full mb-4 dark:bg-gray-600 dark:text-white" placeholder="Enter romaji">
+      <div class="flex space-x-4">
+        <button onclick="checkAnswer()" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-indigo-700">Check</button>
+        <button onclick="nextKana()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next</button>
+      </div>
+      <p id="feedback" class="mt-4"></p>
+    </div>
+  </section>
+
+  <section id="progress" class="max-w-6xl mx-auto my-8 px-4">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-800">Your Progress</h2>
+    <div class="bg-light dark:bg-blue-300 p-6 rounded-lg shadow-md">
+      <canvas id="myChart" class="w-full h-64"></canvas>
+      <button onclick="resetProgress()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Reset Progress</button>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
