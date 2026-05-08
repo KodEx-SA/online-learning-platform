@@ -1,270 +1,519 @@
 <!DOCTYPE html>
-<html lang="ja" class="dark:bg-gray-800 dark:text-gray-100">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Learn Japanese kana with an interactive chart, quiz, and progress tracking for hiragana, katakana, and combination sounds.">
-  <meta name="keywords" content="Japanese, kana, hiragana, katakana, learning, quiz">
-  <title>Japanese Kana Comprehensive Chart</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Learn Japanese hiragana and katakana with interactive tables, audio, a smart quiz, and progress tracking.">
+  <title>KanaMaster — Japanese Kana Learning</title>
+
+  <!-- Single Chart.js load (removed duplicate that was at bottom of original) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts: Syne (headings) + Kaisei Decol (kana display) + Noto Sans JP (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Kaisei+Decol:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: 'Noto Sans JP', sans-serif; }
-    th:hover { background-color: #181010; transition: background-color 0.2s; }
-    @media print { nav, button, #quiz, #search, #progress { display: none; } table { font-size: 12px; } }
-    .dark .bg-white { background-color: #e7f1fa; }
-    .dark .bg-indigo-500 { background-color: #000000; }
-    .dark .text-indigo-800 { color: #062bff; }
-    .dark .border-gray-300 { border-color: #2267f1; }
-    .dark .divide-gray-500 { border-color: #1a6ce7; }
+    /* ───────────────────────────────────────── Reset & Variables */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:            #faf7f0;
+      --surface:       #ffffff;
+      --surface-2:     #f3f0e8;
+      --border:        #e5dfd3;
+      --text:          #1c1917;
+      --text-muted:    #78716c;
+      --primary:       #312e81;
+      --primary-h:     #3730a3;
+      --primary-l:     #4f46e5;
+      --primary-pale:  #eef2ff;
+      --primary-fg:    #ffffff;
+      --accent:        #dc2626;
+      --accent-pale:   #fee2e2;
+      --correct:       #15803d;
+      --correct-pale:  #dcfce7;
+      --nav-bg:        #312e81;
+      --nav-text:      #ffffff;
+      --row-alt:       #f8f5ec;
+      --shadow:        0 2px 12px rgba(0,0,0,0.07);
+      --shadow-lg:     0 8px 32px rgba(0,0,0,0.11);
+      --radius:        12px;
+      --t:             0.2s ease;
+    }
+
+    .dark {
+      --bg:            #0d1117;
+      --surface:       #161b22;
+      --surface-2:     #21262d;
+      --border:        #30363d;
+      --text:          #e6edf3;
+      --text-muted:    #848d97;
+      --primary:       #818cf8;
+      --primary-h:     #a5b4fc;
+      --primary-l:     #6366f1;
+      --primary-pale:  #1e1b4b;
+      --primary-fg:    #ffffff;
+      --accent:        #f87171;
+      --accent-pale:   #450a0a;
+      --correct:       #4ade80;
+      --correct-pale:  #052e16;
+      --nav-bg:        #161b22;
+      --nav-text:      #e6edf3;
+      --row-alt:       #1c2128;
+      --shadow:        0 2px 12px rgba(0,0,0,0.4);
+      --shadow-lg:     0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background var(--t), color var(--t);
+    }
+
+    /* ───────────────────────────────────────── Nav */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--nav-bg);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+      transition: background var(--t);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; padding: 0 24px; gap: 16px;
+    }
+    .nav-brand {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+      letter-spacing: -0.02em; color: #fff; text-decoration: none; white-space: nowrap;
+    }
+    .nav-brand span { color: #a5b4fc; }
+    .nav-links { display: flex; list-style: none; gap: 2px; }
+    .nav-links a {
+      color: rgba(255,255,255,0.78); text-decoration: none;
+      padding: 6px 11px; border-radius: 6px; font-size: 0.85rem; font-weight: 500;
+      transition: background var(--t), color var(--t);
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .dark-toggle {
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      padding: 7px 11px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+      transition: background var(--t);
+    }
+    .dark-toggle:hover { background: rgba(255,255,255,0.22); }
+    .hamburger {
+      display: none; background: none; border: none;
+      color: #fff; font-size: 1.4rem; cursor: pointer; padding: 4px;
+    }
+    .mobile-menu {
+      display: none; background: var(--nav-bg);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 24px 16px;
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu a {
+      display: block; color: rgba(255,255,255,0.8); text-decoration: none;
+      padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 0.95rem;
+    }
+    .mobile-menu a:hover { color: #fff; }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+    }
+
+    /* ───────────────────────────────────────── Hero */
+    .hero {
+      max-width: 1200px; margin: 0 auto;
+      padding: 44px 24px 28px;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(1.9rem, 5vw, 3.2rem);
+      letter-spacing: -0.03em; color: var(--primary); line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .hero .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 22px; }
+
+    details.explainer {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px;
+      box-shadow: var(--shadow); transition: background var(--t), border-color var(--t);
+    }
+    details.explainer summary {
+      font-weight: 600; color: var(--primary); cursor: pointer;
+      font-size: 0.9rem; list-style: none; display: flex; align-items: center; gap: 8px;
+    }
+    details.explainer summary::before {
+      content: '▶'; font-size: 0.55rem; transition: transform 0.2s;
+    }
+    details.explainer[open] summary::before { transform: rotate(90deg); }
+    details.explainer p { margin-top: 10px; color: var(--text-muted); font-size: 0.875rem; line-height: 1.7; }
+
+    .search-wrap { position: relative; }
+    .search-wrap::before {
+      content: '🔍'; position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%); font-size: 0.85rem; pointer-events: none;
+    }
+    #search {
+      width: 100%; padding: 11px 16px 11px 40px;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text);
+      font-size: 0.95rem; font-family: inherit; outline: none;
+      transition: border-color var(--t), box-shadow var(--t), background var(--t);
+    }
+    #search:focus { border-color: var(--primary-l); box-shadow: 0 0 0 3px var(--primary-pale); }
+
+    /* ───────────────────────────────────────── Kana Sections */
+    .kana-section { max-width: 1200px; margin: 0 auto 44px; padding: 0 24px; }
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; }
+    .section-badge {
+      background: var(--primary-pale); color: var(--primary-l);
+      font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    .table-wrap {
+      overflow-x: auto; border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      transition: border-color var(--t);
+    }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.875rem; transition: background var(--t); }
+    thead tr { background: var(--primary); color: #fff; }
+    th {
+      padding: 11px 14px; font-weight: 600; text-align: center;
+      font-size: 0.72rem; letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap;
+    }
+    td {
+      padding: 9px 14px; text-align: center;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--t), border-color var(--t);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) td { background: var(--row-alt); }
+    tbody tr:hover td { background: var(--primary-pale) !important; }
+
+    /* Kana cells — clickable, with speaker affordance */
+    .kana-cell {
+      font-family: 'Kaisei Decol', serif; font-size: 1.45rem;
+      cursor: pointer; color: var(--primary); font-weight: 700;
+      transition: color var(--t), transform 0.12s; position: relative;
+    }
+    .kana-cell:hover { color: var(--accent); transform: scale(1.18); }
+    .kana-cell title { display: none; }
+
+    .example-cell { text-align: left; min-width: 180px; }
+    .ex-word { font-family: 'Kaisei Decol', serif; font-size: 0.95rem; }
+    .ex-romaji { color: var(--text-muted); font-size: 0.72rem; margin: 0 4px; }
+    .ex-meaning { color: var(--primary-l); font-size: 0.72rem; font-weight: 500; }
+
+    .progress-check { accent-color: var(--primary-l); width: 15px; height: 15px; cursor: pointer; }
+
+    /* ───────────────────────────────────────── Quiz */
+    #quiz { max-width: 1200px; margin: 0 auto 44px; padding: 0 24px; }
+    .quiz-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 12px;
+    }
+    .quiz-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; }
+    .score-display { display: flex; gap: 10px; flex-wrap: wrap; }
+    .score-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border-radius: 999px; font-size: 0.82rem; font-weight: 600;
+    }
+    .score-correct  { background: var(--correct-pale);  color: var(--correct); }
+    .score-wrong    { background: var(--accent-pale);   color: var(--accent); }
+    .score-streak   { background: var(--primary-pale);  color: var(--primary-l); }
+
+    .quiz-controls {
+      display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
+    }
+    .pill-group {
+      display: flex; gap: 3px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 3px;
+      transition: background var(--t), border-color var(--t);
+    }
+    .pill-btn {
+      background: transparent; border: none; padding: 5px 15px;
+      border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; color: var(--text-muted);
+      transition: background var(--t), color var(--t);
+      font-family: inherit;
+    }
+    .pill-btn.active { background: var(--primary-l); color: #fff; }
+    .quiz-select {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 15px;
+      font-size: 0.78rem; font-weight: 600; color: var(--text);
+      font-family: inherit; cursor: pointer; outline: none;
+      transition: background var(--t), border-color var(--t), color var(--t);
+    }
+
+    .quiz-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px 32px; text-align: center;
+      box-shadow: var(--shadow-lg);
+      transition: background var(--t), border-color var(--t);
+    }
+    #kana-display {
+      font-family: 'Kaisei Decol', serif;
+      font-size: clamp(4rem, 11vw, 7rem);
+      color: var(--primary); line-height: 1; margin-bottom: 6px;
+      cursor: pointer; display: inline-block;
+      transition: transform 0.12s, color var(--t);
+      user-select: none;
+    }
+    #kana-display:hover { transform: scale(1.06); }
+    #kana-display:active { transform: scale(0.94); }
+    .kana-hint { color: var(--text-muted); font-size: 0.78rem; margin-bottom: 24px; }
+
+    /* Type mode */
+    .type-mode { max-width: 360px; margin: 0 auto; }
+    #user-input {
+      width: 100%; padding: 13px 18px;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      font-size: 1.05rem; font-family: inherit; text-align: center;
+      background: var(--surface); color: var(--text); outline: none;
+      transition: border-color var(--t), box-shadow var(--t), background var(--t);
+      margin-bottom: 14px;
+    }
+    #user-input:focus { border-color: var(--primary-l); box-shadow: 0 0 0 3px var(--primary-pale); }
+
+    /* Multiple choice */
+    .choices-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; max-width: 420px; margin: 0 auto 14px;
+    }
+    .choice-btn {
+      padding: 15px 10px; border: 2px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: border-color var(--t), background var(--t), transform 0.1s;
+      font-family: inherit;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--primary-l); background: var(--primary-pale); transform: translateY(-1px);
+    }
+    .choice-btn.correct { border-color: var(--correct); background: var(--correct-pale); color: var(--correct); }
+    .choice-btn.wrong   { border-color: var(--accent);  background: var(--accent-pale);  color: var(--accent); }
+    .choice-btn:disabled { cursor: default; }
+
+    /* Buttons */
+    .quiz-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 26px; border: none; border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: background var(--t), transform 0.1s, box-shadow var(--t);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary-l); color: #fff; }
+    .btn-primary:hover { background: var(--primary); box-shadow: 0 4px 14px rgba(79,70,229,0.3); }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger { background: var(--accent-pale); color: var(--accent); border: 1px solid var(--accent); }
+    .btn-danger:hover { background: var(--accent); color: #fff; }
+
+    #feedback {
+      min-height: 30px; font-size: 1rem; font-weight: 600;
+      margin-top: 14px; padding: 7px 16px;
+      border-radius: 8px; display: inline-block; transition: background var(--t), color var(--t);
+    }
+    #feedback.correct { background: var(--correct-pale); color: var(--correct); }
+    #feedback.wrong   { background: var(--accent-pale);  color: var(--accent); }
+
+    #speech-status { font-size: 0.73rem; color: var(--text-muted); margin-top: 6px; }
+
+    /* ───────────────────────────────────────── Progress */
+    #progress { max-width: 1200px; margin: 0 auto 60px; padding: 0 24px; }
+    .progress-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 12px;
+    }
+    .progress-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; }
+    .progress-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px;
+      box-shadow: var(--shadow); transition: background var(--t), border-color var(--t);
+    }
+    .progress-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 14px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 15px; text-align: center;
+      transition: background var(--t), border-color var(--t);
+    }
+    .stat-number {
+      font-family: 'Syne', sans-serif; font-size: 1.9rem;
+      font-weight: 800; line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.7rem; color: var(--text-muted);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;
+    }
+    .chart-container { position: relative; height: 270px; }
+
+    /* ───────────────────────────────────────── Footer */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      text-align: center; padding: 22px;
+      color: var(--text-muted); font-size: 0.82rem;
+      transition: background var(--t), border-color var(--t);
+    }
+
+    /* ───────────────────────────────────────── Utilities */
+    .hidden { display: none !important; }
+    tr.search-match td { background: var(--primary-pale) !important; }
+
+    @media (max-width: 640px) {
+      .quiz-card { padding: 24px 16px; }
+      .choices-grid { gap: 8px; }
+      .hero, .kana-section, #quiz, #progress { padding-left: 16px; padding-right: 16px; }
+    }
+
+    @media print {
+      nav, .mobile-menu, #quiz, #progress, .search-wrap, details.explainer, footer { display: none !important; }
+      table { font-size: 11px; box-shadow: none; }
+    }
   </style>
 </head>
-<body class="bg-gradient-to-r from-white-50 to-blue-200 text-black-900 dark:bg-gray-800 dark:text-gray-100">
-  <nav class="bg-indigo-700 text-white p-5 sticky top-0 z-10">
-    <div class="max-w-2xl mx-auto flex justify-between items-center">
-      <ul class="flex space-x-10">
-        <li><a href="#basic-kana" class="hover:underline">Basic Kana</a></li>
-        <li><a href="#voiced-kana" class="hover:underline">Voiced Kana</a></li>
-        <li><a href="#yoon" class="hover:underline">Yōon</a></li>
-        <li><a href="#small-kana" class="hover:underline">Small Kana</a></li>
-        <li><a href="#quiz" class="hover:underline">Quiz</a></li>
-        <li><a href="#progress" class="hover:underline">Progress</a></li>
-      </ul>
-      <!-- <button onclick="toggleDarkMode()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Toggle Dark Mode</button> -->
+
+<body>
+
+<!-- ═══════════════════════════════════════ Nav -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">Kana<span>Master</span></a>
+    <ul class="nav-links">
+      <li><a href="#basic-kana">Basic</a></li>
+      <li><a href="#voiced-kana">Voiced</a></li>
+      <li><a href="#yoon">Yōon</a></li>
+      <li><a href="#small-kana">Special</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+      <li><a href="#progress">Progress</a></li>
+    </ul>
+    <div class="nav-right">
+      <!-- Dark mode toggle — restored from original's commented-out button -->
+      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <span id="dark-icon">🌙</span>
+      </button>
+      <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">☰</button>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <section class="max-w-6xl mx-auto my-8 px-4">
-    <h1 class="text-4xl font-bold text-center py-8 text-indigo-700 dark:text-indigo-300">Japanese Kana Comprehensive Chart</h1>
-    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
-      <summary class="text-lg font-semibold text-indigo-800 dark:text-indigo-800">What are Hiragana and Katakana?</summary>
-      <p class="mt-2 text-indigo-900">Hiragana is used for native Japanese words and grammatical elements, while Katakana is used for foreign words, onomatopoeia, and emphasis.</p>
-    </details>
-    <input type="text" id="search" class="border p-2 w-full mb-4 dark:bg-gray-700 dark:text-white" placeholder="Search kana or romaji">
-  </section>
+<!-- Mobile dropdown menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#basic-kana"  onclick="closeMobileMenu()">Basic Kana</a>
+  <a href="#voiced-kana" onclick="closeMobileMenu()">Voiced Kana</a>
+  <a href="#yoon"        onclick="closeMobileMenu()">Yōon</a>
+  <a href="#small-kana"  onclick="closeMobileMenu()">Special Kana</a>
+  <a href="#quiz"        onclick="closeMobileMenu()">Quiz</a>
+  <a href="#progress"    onclick="closeMobileMenu()">Progress</a>
+</div>
 
-  <section id="basic-kana" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Basic Kana (Hiragana + Katakana)</h2>
-    <div class="overflow-x-auto shadow-md rounded-lg sm:overflow-visible">
-      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
-        <thead class="bg-indigo-500 text-white">
-          <tr>
-            <th class="border border-gray-300 px-4 py-3">Learned</th>
-            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Katakana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Example Word</th>
-          </tr>
-        </thead>
-        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
-          <tr><td><input type="checkbox" onchange="saveProgress('あ', this.checked)"></td><td class="px-4 py-2" onclick="speak('あ')">あ</td><td>a</td><td>ア</td><td>a</td><td>ありがとう (arigatou - thank you)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('い', this.checked)"></td><td class="px-4 py-2" onclick="speak('い')">い</td><td>i</td><td>イ</td><td>i</td><td>いぬ (inu - dog)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('う', this.checked)"></td><td class="px-4 py-2" onclick="speak('う')">う</td><td>u</td><td>ウ</td><td>u</td><td>うみ (umi - sea)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('え', this.checked)"></td><td class="px-4 py-2" onclick="speak('え')">え</td><td>e</td><td>エ</td><td>e</td><td>えき (eki - station)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('お', this.checked)"></td><td class="px-4 py-2" onclick="speak('お')">お</td><td>o</td><td>オ</td><td>o</td><td>おちゃ (ocha - tea)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('か', this.checked)"></td><td class="px-4 py-2" onclick="speak('か')">か</td><td>ka</td><td>カ</td><td>ka</td><td>かさ (kasa - umbrella)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('き', this.checked)"></td><td class="px-4 py-2" onclick="speak('き')">き</td><td>ki</td><td>キ</td><td>ki</td><td>きりん (kirin - giraffe)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('く', this.checked)"></td><td class="px-4 py-2" onclick="speak('く')">く</td><td>ku</td><td>ク</td><td>ku</td><td>くるま (kuruma - car)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('け', this.checked)"></td><td class="px-4 py-2" onclick="speak('け')">け</td><td>ke</td><td>ケ</td><td>ke</td><td>けしゴム (keshigomu - eraser)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('こ', this.checked)"></td><td class="px-4 py-2" onclick="speak('こ')">こ</td><td>ko</td><td>コ</td><td>ko</td><td>こども (kodomo - child)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('さ', this.checked)"></td><td class="px-4 py-2" onclick="speak('さ')">さ</td><td>sa</td><td>サ</td><td>sa</td><td>さかな (sakana - fish)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('し', this.checked)"></td><td class="px-4 py-2" onclick="speak('し')">し</td><td>shi</td><td>シ</td><td>shi</td><td>しろ (shiro - white)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('す', this.checked)"></td><td class="px-4 py-2" onclick="speak('す')">す</td><td>su</td><td>ス</td><td>su</td><td>すいか (suika - watermelon)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('せ', this.checked)"></td><td class="px-4 py-2" onclick="speak('せ')">せ</td><td>se</td><td>セ</td><td>se</td><td>せんせい (sensei - teacher)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('そ', this.checked)"></td><td class="px-4 py-2" onclick="speak('そ')">そ</td><td>so</td><td>ソ</td><td>so</td><td>そら (sora - sky)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('た', this.checked)"></td><td class="px-4 py-2" onclick="speak('た')">た</td><td>ta</td><td>タ</td><td>ta</td><td>たこ (tako - octopus)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ち', this.checked)"></td><td class="px-4 py-2" onclick="speak('ち')">ち</td><td>chi</td><td>チ</td><td>chi</td><td>ちず (chizu - map)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('つ', this.checked)"></td><td class="px-4 py-2" onclick="speak('つ')">つ</td><td>tsu</td><td>ツ</td><td>tsu</td><td>つき (tsuki - moon)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('て', this.checked)"></td><td class="px-4 py-2" onclick="speak('て')">て</td><td>te</td><td>テ</td><td>te</td><td>てがみ (tegami - letter)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('と', this.checked)"></td><td class="px-4 py-2" onclick="speak('と')">と</td><td>to</td><td>ト</td><td>to</td><td>とけい (tokei - clock)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('な', this.checked)"></td><td class="px-4 py-2" onclick="speak('な')">な</td><td>na</td><td>ナ</td><td>na</td><td>なまえ (namae - name)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('に', this.checked)"></td><td class="px-4 py-2" onclick="speak('に')">に</td><td>ni</td><td>ニ</td><td>ni</td><td>にほん (nihon - Japan)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぬ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぬ')">ぬ</td><td>nu</td><td>ヌ</td><td>nu</td><td>ぬの (nuno - cloth)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ね', this.checked)"></td><td class="px-4 py-2" onclick="speak('ね')">ね</td><td>ne</td><td>ネ</td><td>ne</td><td>ねこ (neko - cat)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('の', this.checked)"></td><td class="px-4 py-2" onclick="speak('の')">の</td><td>no</td><td>ノ</td><td>no</td><td>のり (nori - seaweed)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('は', this.checked)"></td><td class="px-4 py-2" onclick="speak('は')">は</td><td>ha</td><td>ハ</td><td>ha</td><td>はな (hana - flower)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ひ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひ')">ひ</td><td>hi</td><td>ヒ</td><td>hi</td><td>ひこうき (hikouki - airplane)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ふ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ふ')">ふ</td><td>fu</td><td>フ</td><td>fu</td><td>ふね (fune - boat)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('へ', this.checked)"></td><td class="px-4 py-2" onclick="speak('へ')">へ</td><td>he</td><td>ヘ</td><td>he</td><td>へや (heya - room)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ほ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ほ')">ほ</td><td>ho</td><td>ホ</td><td>ho</td><td>ほん (hon - book)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ま', this.checked)"></td><td class="px-4 py-2" onclick="speak('ま')">ま</td><td>ma</td><td>マ</td><td>ma</td><td>まど (mado - window)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('み', this.checked)"></td><td class="px-4 py-2" onclick="speak('み')">み</td><td>mi</td><td>ミ</td><td>mi</td><td>みず (mizu - water)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('む', this.checked)"></td><td class="px-4 py-2" onclick="speak('む')">む</td><td>mu</td><td>ム</td><td>mu</td><td>むし (mushi - insect)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('め', this.checked)"></td><td class="px-4 py-2" onclick="speak('め')">め</td><td>me</td><td>メ</td><td>me</td><td>めがね (megane - glasses)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('も', this.checked)"></td><td class="px-4 py-2" onclick="speak('も')">も</td><td>mo</td><td>モ</td><td>mo</td><td>もも (momo - peach)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('や', this.checked)"></td><td class="px-4 py-2" onclick="speak('や')">や</td><td>ya</td><td>ヤ</td><td>ya</td><td>やま (yama - mountain)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ゆ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゆ')">ゆ</td><td>yu</td><td>ユ</td><td>yu</td><td>ゆき (yuki - snow)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('よ', this.checked)"></td><td class="px-4 py-2" onclick="speak('よ')">よ</td><td>yo</td><td>ヨ</td><td>yo</td><td>よる (yoru - night)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ら', this.checked)"></td><td class="px-4 py-2" onclick="speak('ら')">ら</td><td>ra</td><td>ラ</td><td>ra</td><td>ラジオ (rajio - radio)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('り', this.checked)"></td><td class="px-4 py-2" onclick="speak('り')">り</td><td>ri</td><td>リ</td><td>ri</td><td>りんご (ringo - apple)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('る', this.checked)"></td><td class="px-4 py-2" onclick="speak('る')">る</td><td>ru</td><td>ル</td><td>ru</td><td>るす (rusu - absence)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('れ', this.checked)"></td><td class="px-4 py-2" onclick="speak('れ')">れ</td><td>re</td><td>レ</td><td>re</td><td>れいぞうこ (reizouko - refrigerator)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ろ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ろ')">ろ</td><td>ro</td><td>ロ</td><td>ro</td><td>ろぼっと (robotto - robot)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('わ', this.checked)"></td><td class="px-4 py-2" onclick="speak('わ')">わ</td><td>wa</td><td>ワ</td><td>wa</td><td>わに (wani - crocodile)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('を', this.checked)"></td><td class="px-4 py-2" onclick="speak('を')">を</td><td>wo</td><td>ヲ</td><td>wo</td><td>を (particle)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ん', this.checked)"></td><td class="px-4 py-2" onclick="speak('ん')">ん</td><td>n</td><td>ン</td><td>n</td><td>こんにちは (konnichiwa - hello)</td></tr>
-        </tbody>
-      </table>
+<!-- ═══════════════════════════════════════ Hero -->
+<div class="hero">
+  <h1>Japanese Kana<br>Comprehensive Chart</h1>
+  <p class="subtitle">Master hiragana &amp; katakana — interactive tables, audio pronunciation, smart quiz, and progress tracking.</p>
+
+  <details class="explainer">
+    <summary>What are Hiragana and Katakana?</summary>
+    <p>Japanese uses three writing systems. <strong>Hiragana</strong> (curved characters) represents native Japanese words and grammatical particles. <strong>Katakana</strong> (angular characters) is used for foreign loanwords, onomatopoeia, and emphasis. Together they form the two <em>kana</em> syllabaries — each with ~46 base characters plus voiced/combination variants. <strong>Click any kana character</strong> in the tables below to hear its pronunciation.</p>
+  </details>
+
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search kana or romaji (e.g. か, ka, sha, ざ…)" autocomplete="off" spellcheck="false">
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ Tables (generated by JS — no more 200+ inline rows) -->
+<div id="kana-tables"></div>
+
+<!-- ═══════════════════════════════════════ Quiz -->
+<section id="quiz">
+  <div class="quiz-header">
+    <h2 class="quiz-title">Kana Quiz</h2>
+    <div class="score-display">
+      <div class="score-pill score-correct">✓ <span id="score-correct">0</span> correct</div>
+      <div class="score-pill score-wrong">✗ <span id="score-wrong">0</span> wrong</div>
+      <div class="score-pill score-streak">🔥 <span id="score-streak">0</span> streak</div>
     </div>
-  </section>
+  </div>
 
-  <section id="voiced-kana" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Voiced Kana (Dakuon & Handakuon)</h2>
-    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
-      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Dakuon and Handakuon?</summary>
-      <p class="mt-2 text-indigo-900">Dakuon are voiced kana with two dots (e.g., が from か), and Handakuon are semi-voiced with a circle (e.g., ぱ from は).</p>
-    </details>
-    <div class="overflow-x-auto shadow-md rounded-lg">
-      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
-        <thead class="bg-indigo-500 text-white">
-          <tr>
-            <th class="border border-gray-300 px-4 py-3">Learned</th>
-            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Katakana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Example Word</th>
-          </tr>
-        </thead>
-        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
-          <tr><td><input type="checkbox" onchange="saveProgress('が', this.checked)"></td><td class="px-4 py-2" onclick="speak('が')">が</td><td>ga</td><td>ガ</td><td>ga</td><td>がっこう (gakkou - school)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぎ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎ')">ぎ</td><td>gi</td><td>ギ</td><td>gi</td><td>ぎん (gin - silver)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぐ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぐ')">ぐ</td><td>gu</td><td>グ</td><td>gu</td><td>ぐるぐる (guruguru - spinning)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('げ', this.checked)"></td><td class="px-4 py-2" onclick="speak('げ')">げ</td><td>ge</td><td>ゲ</td><td>ge</td><td>げんき (genki - healthy)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ご', this.checked)"></td><td class="px-4 py-2" onclick="speak('ご')">ご</td><td>go</td><td>ゴ</td><td>go</td><td>ごはん (gohan - rice)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ざ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ざ')">ざ</td><td>za</td><td>ザ</td><td>za</td><td>ざっし (zasshi - magazine)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('じ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じ')">じ</td><td>ji</td><td>ジ</td><td>ji</td><td>じしょ (jisho - dictionary)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ず', this.checked)"></td><td class="px-4 py-2" onclick="speak('ず')">ず</td><td>zu</td><td>ズ</td><td>zu</td><td>ずぼん (zubon - trousers)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぜ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぜ')">ぜ</td><td>ze</td><td>ゼ</td><td>ze</td><td>ぜんぶ (zenbu - all)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぞ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぞ')">ぞ</td><td>zo</td><td>ゾ</td><td>zo</td><td>ぞう (zou - elephant)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('だ', this.checked)"></td><td class="px-4 py-2" onclick="speak('だ')">だ</td><td>da</td><td>ダ</td><td>da</td><td>だいず (daizu - soybean)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぢ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぢ')">ぢ</td><td>ji</td><td>ヂ</td><td>ji</td><td>はぢ (haji - shame)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('づ', this.checked)"></td><td class="px-4 py-2" onclick="speak('づ')">づ</td><td>zu</td><td>ヅ</td><td>zu</td><td>つづく (tsuzuku - continue)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('で', this.checked)"></td><td class="px-4 py-2" onclick="speak('で')">で</td><td>de</td><td>デ</td><td>de</td><td>でんしゃ (densha - train)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ど', this.checked)"></td><td class="px-4 py-2" onclick="speak('ど')">ど</td><td>do</td><td>ド</td><td>do</td><td>どあ (doa - door)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ば', this.checked)"></td><td class="px-4 py-2" onclick="speak('ば')">ば</td><td>ba</td><td>バ</td><td>ba</td><td>ばら (bara - rose)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('び', this.checked)"></td><td class="px-4 py-2" onclick="speak('び')">び</td><td>bi</td><td>ビ</td><td>bi</td><td>びようしつ (biyoushitsu - salon)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぶ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぶ')">ぶ</td><td>bu</td><td>ブ</td><td>bu</td><td>ぶた (buta - pig)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('べ', this.checked)"></td><td class="px-4 py-2" onclick="speak('べ')">べ</td><td>be</td><td>ベ</td><td>be</td><td>べんとう (bentou - lunchbox)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぼ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぼ')">ぼ</td><td>bo</td><td>ボ</td><td>bo</td><td>ぼうし (boushi - hat)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぱ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぱ')">ぱ</td><td>pa</td><td>パ</td><td>pa</td><td>ぱん (pan - bread)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぴ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴ')">ぴ</td><td>pi</td><td>ピ</td><td>pi</td><td>ぴあの (piano - piano)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぷ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぷ')">ぷ</td><td>pu</td><td>プ</td><td>pu</td><td>ぷーる (puuru - pool)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぺ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぺ')">ぺ</td><td>pe</td><td>ペ</td><td>pe</td><td>ぺん (pen - pen)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぽ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぽ')">ぽ</td><td>po</td><td>ポ</td><td>po</td><td>ぽけっと (poketto - pocket)</td></tr>
-        </tbody>
-      </table>
+  <!-- Quiz controls: script/style/category — new features -->
+  <div class="quiz-controls">
+    <div class="pill-group" title="Which script to display">
+      <button class="pill-btn active" data-mode="hiragana" onclick="setQuizMode('hiragana', this)">Hiragana</button>
+      <button class="pill-btn"        data-mode="katakana" onclick="setQuizMode('katakana', this)">Katakana</button>
     </div>
-  </section>
-
-  <section id="yoon" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Combo Sounds (Yōon)</h2>
-    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
-      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Yōon?</summary>
-      <p class="mt-2 text-indigo-900">Yōon are combination sounds where a consonant kana is followed by a small ゃ, ゅ, or ょ, creating a single syllable (e.g., きゃ = kya).</p>
-    </details>
-    <div class="overflow-x-auto shadow-md rounded-lg">
-      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
-        <thead class="bg-indigo-500 text-white">
-          <tr>
-            <th class="border border-gray-300 px-4 py-3">Learned</th>
-            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Katakana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Example Word</th>
-          </tr>
-        </thead>
-        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-500">
-          <tr><td><input type="checkbox" onchange="saveProgress('きゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きゃ')">きゃ</td><td>kya</td><td>キャ</td><td>kya</td><td>きゃべつ (kyabetsu - cabbage)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('きゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きゅ')">きゅ</td><td>kyu</td><td>キュ</td><td>kyu</td><td>きゅうり (kyuuri - cucumber)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('きょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('きょ')">きょ</td><td>kyo</td><td>キョ</td><td>kyo</td><td>きょう (kyou - today)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('しゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しゃ')">しゃ</td><td>sha</td><td>シャ</td><td>sha</td><td>しゃしん (shashin - photo)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('しゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しゅ')">しゅ</td><td>shu</td><td>シュ</td><td>shu</td><td>しゅうまつ (shuumatsu - weekend)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('しょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('しょ')">しょ</td><td>sho</td><td>ショ</td><td>sho</td><td>しょてん (shoten - bookstore)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ちゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちゃ')">ちゃ</td><td>cha</td><td>チャ</td><td>cha</td><td>ちゃわん (chawan - teacup)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ちゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちゅ')">ちゅ</td><td>chu</td><td>チュ</td><td>chu</td><td>ちゅうがっこう (chuugakkou - middle school)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ちょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ちょ')">ちょ</td><td>cho</td><td>チョ</td><td>cho</td><td>ちょこ (choko - chocolate)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('にゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にゃ')">にゃ</td><td>nya</td><td>ニャ</td><td>nya</td><td>にゃんこ (nyanko - kitty)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('にゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にゅ')">にゅ</td><td>nyu</td><td>ニュ</td><td>nyu</td><td>にゅうし (nyuushi - entrance exam)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('にょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('にょ')">にょ</td><td>nyo</td><td>ニョ</td><td>nyo</td><td>にょう (nyou - urine)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ひゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひゃ')">ひゃ</td><td>hya</td><td>ヒャ</td><td>hya</td><td>ひゃく (hyaku - hundred)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ひゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひゅ')">ひゅ</td><td>hyu</td><td>ヒュ</td><td>hyu</td><td>ひゅう (hyuu - whistling sound)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ひょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ひょ')">ひょ</td><td>hyo</td><td>ヒョ</td><td>hyo</td><td>ひょう (hyou - chart)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('みゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みゃ')">みゃ</td><td>mya</td><td>ミャ</td><td>mya</td><td>みゃく (myaku - pulse)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('みゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みゅ')">みゅ</td><td>myu</td><td>ミュ</td><td>myu</td><td>ミュージック (myuujikku - music)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('みょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('みょ')">みょ</td><td>myo</td><td>ミョ</td><td>myo</td><td>みょうじ (myouji - surname)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('りゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りゃ')">りゃ</td><td>rya</td><td>リャ</td><td>rya</td><td>りゃくご (ryakugo - abbreviation)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('りゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りゅ')">りゅ</td><td>ryu</td><td>リュ</td><td>ryu</td><td>りゅう (ryuu - dragon)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('りょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('りょ')">りょ</td><td>ryo</td><td>リョ</td><td>ryo</td><td>りょこう (ryokou - travel)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぎゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎゃ')">ぎゃ</td><td>gya</td><td>ギャ</td><td>gya</td><td>ぎゃく (gyaku - reverse)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぎゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎゅ')">ぎゅ</td><td>gyu</td><td>ギュ</td><td>gyu</td><td>ぎゅう (gyuu - cow)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぎょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぎょ')">ぎょ</td><td>gyo</td><td>ギョ</td><td>gyo</td><td>ぎょかい (gyokai - fishing industry)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('じゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じゃ')">じゃ</td><td>ja</td><td>ジャ</td><td>ja</td><td>じゃがいも (jagaimo - potato)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('じゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じゅ')">じゅ</td><td>ju</td><td>ジュ</td><td>ju</td><td>じゅう (juu - ten)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('じょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('じょ')">じょ</td><td>jo</td><td>ジョ</td><td>jo</td><td>じょう (jou - castle)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('びゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びゃ')">びゃ</td><td>bya</td><td>ビャ</td><td>bya</td><td>びゃくや (byakuya - white night)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('びゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びゅ')">びゅ</td><td>byu</td><td>ビュ</td><td>byu</td><td>ビュー (byuu - view)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('びょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('びょ')">びょ</td><td>byo</td><td>ビョ</td><td>byo</td><td>びょういん (byouin - hospital)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぴゃ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴゃ')">ぴゃ</td><td>pya</td><td>ピャ</td><td>pya</td><td>ぴゃっと (pyatto - quickly)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぴゅ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴゅ')">ぴゅ</td><td>pyu</td><td>ピュ</td><td>pyu</td><td>ピュア (pyua - pure)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ぴょ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ぴょ')">ぴょ</td><td>pyo</td><td>ピョ</td><td>pyo</td><td>ぴょん (pyon - hop)</td></tr>
-        </tbody>
-      </table>
+    <div class="pill-group" title="Quiz style">
+      <button class="pill-btn active" data-style="type"   onclick="setQuizStyle('type', this)">Type</button>
+      <button class="pill-btn"        data-style="choice" onclick="setQuizStyle('choice', this)">Multiple Choice</button>
     </div>
-  </section>
+    <select class="quiz-select" id="quiz-category" onchange="nextKana()">
+      <option value="all">All Categories</option>
+      <option value="basic-kana">Basic Kana</option>
+      <option value="voiced-kana">Voiced Kana</option>
+      <option value="yoon">Yōon</option>
+      <option value="small-kana">Special Kana</option>
+    </select>
+  </div>
 
-  <section id="small-kana" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-300">Small Kana & Obsolete Kana</h2>
-    <details class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
-      <summary class="text-lg font-semibold text-indigo-700 dark:text-indigo-800">What are Small Kana?</summary>
-      <p class="mt-2 text-indigo-900">Small kana like っ modify pronunciation (gemination), while ゐ and ゑ are obsolete kana used historically.</p>
-    </details>
-    <div class="overflow-x-auto shadow-md rounded-lg">
-      <table class="w-full text-center border border-gray-300 text-sm sm:text-base md:text-lg lg:text-xl">
-        <thead class="bg-indigo-500 text-white">
-          <tr>
-            <th class="border border-gray-300 px-4 py-3">Learned</th>
-            <th class="border border-gray-300 px-4 py-3">Hiragana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Katakana</th>
-            <th class="border border-gray-300 px-4 py-3">Romaji</th>
-            <th class="border border-gray-300 px-4 py-3">Example Word</th>
-          </tr>
-        </thead>
-        <tbody class="bg-black dark:bg-gray-700 divide-y divide-gray-800">
-          <tr><td><input type="checkbox" onchange="saveProgress('っ', this.checked)"></td><td class="px-4 py-2" onclick="speak('っ')">っ</td><td>(gemination)</td><td>ッ</td><td>(gemination)</td><td>きって (kitte - stamp)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ゐ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゐ')">ゐ</td><td>wi</td><td>ヰ</td><td>wi</td><td>(historical use)</td></tr>
-          <tr><td><input type="checkbox" onchange="saveProgress('ゑ', this.checked)"></td><td class="px-4 py-2" onclick="speak('ゑ')">ゑ</td><td>we</td><td>ヱ</td><td>we</td><td>(historical use)</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <div class="quiz-card">
+    <!-- Large kana display — click to hear pronunciation -->
+    <div id="kana-display" onclick="speakCurrent()" title="Click to hear pronunciation" role="button" aria-label="Kana character — click to hear">あ</div>
+    <p class="kana-hint" id="quiz-hint">Click the character to hear it · Type the romaji below</p>
 
-  <section id="quiz" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-700">Kana Quiz</h2>
-    <div class="bg-black dark:bg-gray-700 p-6 rounded-lg shadow-md">
-      <p class="text-3xl text-center mb-4" id="kana-display">あ</p>
-      <input type="text" id="user-input" class="border p-2 w-full mb-4 dark:bg-gray-600 dark:text-white" placeholder="Enter romaji">
-      <div class="flex space-x-4">
-        <button onclick="checkAnswer()" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-indigo-700">Check</button>
-        <button onclick="nextKana()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Next</button>
+    <!-- Type-in mode -->
+    <div class="type-mode" id="type-mode">
+      <input type="text" id="user-input" placeholder="Type romaji here…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="quiz-buttons">
+        <button class="btn btn-primary"    onclick="checkAnswer()">Check</button>
+        <button class="btn btn-secondary"  onclick="nextKana()">Skip →</button>
       </div>
-      <p id="feedback" class="mt-4"></p>
     </div>
-  </section>
 
-  <section id="progress" class="max-w-6xl mx-auto my-8 px-4">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-800 dark:text-indigo-800">Your Progress</h2>
-    <div class="bg-light dark:bg-blue-300 p-6 rounded-lg shadow-md">
-      <canvas id="myChart" class="w-full h-64"></canvas>
-      <button onclick="resetProgress()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Reset Progress</button>
+    <!-- Multiple-choice mode (hidden by default) -->
+    <div id="choice-mode" class="hidden">
+      <div class="choices-grid" id="choices-grid"></div>
+      <div class="quiz-buttons">
+        <button class="btn btn-secondary" onclick="nextKana()">Skip →</button>
+      </div>
     </div>
-  </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="./script.js"></script>
+    <div id="feedback"></div>
+    <p id="speech-status"></p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ Progress -->
+<section id="progress">
+  <div class="progress-header">
+    <h2 class="progress-title">Your Progress</h2>
+    <button class="btn btn-danger" onclick="confirmReset()">Reset Progress</button>
+  </div>
+  <div class="progress-card">
+    <div class="progress-stats" id="progress-stats"></div>
+    <div class="chart-container">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<footer>
+  KanaMaster &nbsp;·&nbsp; Click any kana in the tables to hear pronunciation &nbsp;·&nbsp; Progress is saved locally in your browser
+</footer>
+
+<script src="script.js"></script>
+
 </body>
 </html>
